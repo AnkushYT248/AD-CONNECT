@@ -73,7 +73,7 @@ export const Login = () => {
           <div class="text-center feedback p-2 rounded text-center w-full">
             {feedback}
           </div>
-      )};
+      )}
 
           <form className="mt-2 space-y-4" onSubmit={handleSubmit}>
             <label className="input input-bordered flex items-center gap-2 w-full">
