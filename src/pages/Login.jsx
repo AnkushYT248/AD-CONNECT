@@ -4,6 +4,7 @@ import { Images } from "../constend/Images";
 import { FaKey } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useState } from "react";
+import { auth, googleProvider, signInWithEmailAndPassword, signInWithPopup } from '../constend/firebase'
 
 export const Login = () => {
   const [isChecked, setIsChecked] = useState(true);
@@ -14,6 +15,7 @@ export const Login = () => {
   });
 
   const [feedback,setFeedback] = useState("");
+  const [feedbackType, setFeedbackType] = useState("");
 
   const handleInputChange = (e) => {
     const {name,value} = e.target;
@@ -24,19 +26,34 @@ export const Login = () => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if(!formData.email || !formData.password) {
       setFeedback("Please fill all the fields");
+      setFeedbackType("error");
       return;
     }
 
-    if(formData.email === "xcvkp@example.com" && formData.password === "admin") {
-      setFeedback("Login Successful");
-    }else {
-      setFeedback("Login Failed");
+    try {
+       await signInWithEmailAndPassword(auth, formData.email, formData.password);
+       setFeedback("Login successful");
+       setFeedbackType("success");
+    } catch (error) {
+      let message;
+      switch (error.message) {
+         case "auth/invalid-credential":
+          message = "Invalid email or password";
+            break;
+         default:
+            break;
+      }
+      
+      
+       setFeedback(message);
+       setFeedbackType("error");
     }
+    
   }
 
   return (
@@ -70,7 +87,7 @@ export const Login = () => {
           <p className="text-center text-gray-600 mt-2 w-full">--OR--</p>
 
           {feedback &&(
-          <div class="text-center feedback p-2 rounded text-center w-full">
+          <div class={`text-center feedback p-2 rounded text-center w-full ${feedbackType === "success" ? "bg-green-700 text-white" : "bg-red-700 text-white"}`}>
             {feedback}
           </div>
       )}
