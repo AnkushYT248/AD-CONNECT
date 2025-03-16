@@ -1,8 +1,9 @@
 import { Images } from "../constend/Images";
 import { FaKey } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
-import { useState } from "react";
-import { auth, googleProvider, createUserWithEmailAndPassword, signInWithPopup } from '../constend/firebase'
+import { useState,useRef } from "react";
+import { FullScreenPreloader } from "../components/FullScreenPreloader";
+import { auth, googleProvider, createUserWithEmailAndPassword, signInWithPopup,onAuthStateChanged } from '../constend/firebase'
 
 export const Signup = () => {
   const [isChecked, setIsChecked] = useState(true);
@@ -11,6 +12,7 @@ export const Signup = () => {
     email: "",
     password: "",
   });
+  const preloaderRef = useRef(null);
 
   const [feedback,setFeedback] = useState("");
   const [feedbackType, setFeedbackType] = useState("");
@@ -26,7 +28,6 @@ export const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const preloader = document.querySelector('.fullScreenPreloader');
     
     if (!formData.email || !formData.password) {
       setFeedback("Please fill all the fields");
@@ -35,7 +36,7 @@ export const Signup = () => {
     }
 
     try {
-      preloader.style.display = 'flex';
+      if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
       await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       setFeedback("Account Created successfully");
       setFeedbackType("success");
@@ -66,7 +67,7 @@ export const Signup = () => {
       setFeedback(message);
       setFeedbackType("error");
     } finally {
-      preloader.style.display = 'none';
+      if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
     }
   };
 
@@ -83,18 +84,29 @@ export const Signup = () => {
   }
 
   const checkUserLoggedIn = () => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "/home";
-      } else {
-        console.log(`No user logged in`);
-      }
-    });
+    try {
+       if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
+       onAuthStateChanged(auth, (user) => {
+         if (user) {
+           window.location.href = "/home";
+         } else {
+           console.log(`No user logged in`);
+         }
+       });
+    } catch (error) {
+       console.error(`Error: ${error}`);
+    }finally {
+       if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+    }
   };
 
   checkUserLoggedIn();
 
+  document.title = "AD Connect | Signup";
+
   return (
+    <>
+      <FullScreenPreloader ref={preloaderRef}/>
     <main className="flex items-center justify-center min-h-screen bg-base-100">
 
       <div className="card w-full max-w-4xl shadow-lg bg-base-200 p-6 rounded-xl flex flex-col md:flex-row gap-6">
@@ -104,6 +116,7 @@ export const Signup = () => {
             src={Images.tides_images}
             alt="tides"
             className="w-full h-full object-cover rounded-xl"
+            lode="lazy"
           />
         </div>
 
@@ -195,6 +208,7 @@ export const Signup = () => {
         </div>
       </div>
     </main>
+    </>
   );
 };
 

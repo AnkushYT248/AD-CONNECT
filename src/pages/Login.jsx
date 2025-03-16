@@ -1,7 +1,7 @@
 import { Images } from "../constend/Images";
 import { FaKey } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { FullScreenPreloader } from "../components/FullScreenPreloader";
 import { auth, googleProvider, signInWithEmailAndPassword, signInWithPopup, onAuthStateChanged } from '../constend/firebase'
 
@@ -12,6 +12,7 @@ export const Login = () => {
     email: "",
     password: "",
   });
+  const preloaderRef = useRef(null);
 
   const [feedback,setFeedback] = useState("");
   const [feedbackType, setFeedbackType] = useState("");
@@ -27,7 +28,6 @@ export const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const preloader = document.querySelector('.fullScreenPreloader');
     
     if(!formData.email || !formData.password) {
       setFeedback("Please fill all the fields");
@@ -36,7 +36,7 @@ export const Login = () => {
     }
 
     try {
-      preloader.style.display = 'flex';
+      if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
       await signInWithEmailAndPassword(auth, formData.email, formData.password);
       setFeedback("Login successful");
       setFeedbackType("success");
@@ -67,7 +67,7 @@ export const Login = () => {
       setFeedback(message);
       setFeedbackType("error");
     } finally {
-      preloader.style.display = 'none';
+      if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
     }
   }
 
@@ -84,20 +84,29 @@ export const Login = () => {
   }
 
   const checkUserLoggedIn = () => {
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        window.location.href = "/home";
-      } else {
-        console.log(`No user logged in`);
-      }
-    });
+    try {
+       if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          window.location.href = "/home";
+        } else {
+          console.log(`No user logged in`);
+        }
+      });
+    } catch (error) {
+       console.error(`${error}`);
+    } finally {
+       if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+    }
   };
 
   checkUserLoggedIn();
 
+  document.title = "AD CONNECT | Login";
+
   return (
     <>
-    <FullScreenPreloader />
+    <FullScreenPreloader ref={preloaderRef}/>
     <main className="flex items-center justify-center min-h-screen bg-base-100">
       
       <div className="card w-full max-w-4xl shadow-lg bg-base-200 p-6 rounded-xl flex flex-col md:flex-row gap-6">
@@ -107,6 +116,7 @@ export const Login = () => {
             src={Images.beach_image}
             alt="Beach"
             className="w-full h-full object-cover rounded-xl"
+            lode="lazy"
           />
         </div>
 
@@ -190,7 +200,7 @@ export const Login = () => {
 
           <div className="flex flex-col md:flex-row items-center justify-between">
             <p className="text-sm text-gray-400 text-center mt-4">
-              <a href="#" className="text-blue-500 hover:underline">
+              <a href="/forgotpassword" className="text-blue-500 hover:underline">
                 Forgot Password
               </a>
             </p>
