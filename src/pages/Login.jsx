@@ -41,7 +41,7 @@ export const Login = () => {
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-base-100">
-      
+
       <div className="card w-full max-w-4xl shadow-lg bg-base-200 p-6 rounded-xl flex flex-col md:flex-row gap-6">
         {/* Left Card (Image Section) */}
         <div className="w-full md:w-1/2">
@@ -115,7 +115,12 @@ export const Login = () => {
               </label>
 
               <label className="fieldset-label">
-                <input type="checkbox" className="checkbox" checked={showPassword} onChange={setShowPassword(!showPassword)}/>
+                <input 
+                  type="checkbox" 
+                  className="checkbox" 
+                  checked={showPassword} 
+                  onChange={() => setShowPassword(!showPassword)}
+                />
                 Show Password
               </label>
             </fieldset>
