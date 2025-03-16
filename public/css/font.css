@@ -1,0 +1,19 @@
+@font-face {
+  font-family: 'monts';
+  src: url('../fonts/monts.ttf');
+}
+
+@font-face {
+  font-family: 'monts_bold';
+  src: url('../fonts/monts_bold.ttf');
+}
+
+@font-face {
+  font-family: 'lg';
+  src: url('../fonts/lg.otf');
+}
+
+@font-face {
+  font-family: 'soule regular';
+  src: url('../fonts/soule_regular.ttf');
+}
