@@ -26,7 +26,8 @@ export const Signup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    const preloader = document.querySelector('.fullScreenPreloader');
+    
     if (!formData.email || !formData.password) {
       setFeedback("Please fill all the fields");
       setFeedbackType("error");
@@ -34,6 +35,7 @@ export const Signup = () => {
     }
 
     try {
+      preloader.style.display = 'flex';
       await createUserWithEmailAndPassword(auth, formData.email, formData.password);
       setFeedback("Account Created successfully");
       setFeedbackType("success");
@@ -63,6 +65,8 @@ export const Signup = () => {
 
       setFeedback(message);
       setFeedbackType("error");
+    } finally {
+      preloader.style.display = 'none';
     }
   };
 
