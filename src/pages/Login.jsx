@@ -36,24 +36,37 @@ export const Login = () => {
     }
 
     try {
-       await signInWithEmailAndPassword(auth, formData.email, formData.password);
-       setFeedback("Login successful");
-       setFeedbackType("success");
+      await signInWithEmailAndPassword(auth, formData.email, formData.password);
+      setFeedback("Login successful");
+      setFeedbackType("success");
     } catch (error) {
-      let message;
-      switch (error.message) {
-         case "auth/invalid-credential":
+      let message = "An error occurred during login";
+
+      switch (error.code) {
+        case "auth/invalid-credential":
           message = "Invalid email or password";
-            break;
-         default:
-            break;
+          break;
+        case "auth/user-not-found":
+          message = "User not found";
+          break;
+        case "auth/wrong-password":
+          message = "Incorrect password";
+          break;
+        case "auth/invalid-email":
+          message = "Invalid email format";
+          break;
+        case "auth/user-disabled":
+          message = "This account has been disabled";
+          break;
+        case "auth/too-many-requests":
+          message = "Too many attempts. Try again later";
+          break;
       }
-      
-      
-       setFeedback(message);
-       setFeedbackType("error");
+
+      setFeedback(message);
+      setFeedbackType("error");
     }
-    
+
   }
 
   return (
