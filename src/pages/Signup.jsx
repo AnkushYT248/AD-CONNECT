@@ -2,10 +2,9 @@ import { Images } from "../constend/Images";
 import { FaKey } from "react-icons/fa6";
 import { MdEmail } from "react-icons/md";
 import { useState } from "react";
-import { FullScreenPreloader } from "../components/FullScreenPreloader";
-import { auth, googleProvider, signInWithEmailAndPassword, signInWithPopup, onAuthStateChanged } from '../constend/firebase'
+import { auth, googleProvider, createUserWithEmailAndPassword, signInWithPopup } from '../constend/firebase'
 
-export const Login = () => {
+export const Signup = () => {
   const [isChecked, setIsChecked] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,45 +27,44 @@ export const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if(!formData.email || !formData.password) {
+    if (!formData.email || !formData.password) {
       setFeedback("Please fill all the fields");
       setFeedbackType("error");
       return;
     }
 
     try {
-      await signInWithEmailAndPassword(auth, formData.email, formData.password);
-      setFeedback("Login successful");
+      await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+      setFeedback("Account Created successfully");
       setFeedbackType("success");
     } catch (error) {
-      let message = "An error occurred during login";
+      let message = "An error occurred during account creation";
 
       switch (error.code) {
-        case "auth/invalid-credential":
-          message = "Invalid email or password";
-          break;
-        case "auth/user-not-found":
-          message = "User not found";
-          break;
-        case "auth/wrong-password":
-          message = "Incorrect password";
+        case "auth/email-already-in-use":
+          message = "This email is already registered";
           break;
         case "auth/invalid-email":
           message = "Invalid email format";
           break;
-        case "auth/user-disabled":
-          message = "This account has been disabled";
+        case "auth/weak-password":
+          message = "Password should be at least 6 characters";
           break;
-        case "auth/too-many-requests":
-          message = "Too many attempts. Try again later";
+        case "auth/operation-not-allowed":
+          message = "Account creation is not allowed at the moment";
+          break;
+        case "auth/network-request-failed":
+          message = "Network error. Please try again later";
+          break;
+        default:
+          message = error.message; // Fallback to Firebase's error message
           break;
       }
 
       setFeedback(message);
       setFeedbackType("error");
     }
-
-  }
+  };
 
   const handelGoogleSignIn = async () => {
     try {
@@ -77,7 +75,7 @@ export const Login = () => {
        setFeedback("An error occurred during login "+ error.message);
        setFeedbackType("error");
     }
-    
+
   }
 
   const checkUserLoggedIn = () => {
@@ -93,16 +91,14 @@ export const Login = () => {
   checkUserLoggedIn();
 
   return (
-    <>
-    <FullScreenPreloader />
     <main className="flex items-center justify-center min-h-screen bg-base-100">
-      
+
       <div className="card w-full max-w-4xl shadow-lg bg-base-200 p-6 rounded-xl flex flex-col md:flex-row gap-6">
         {/* Left Card (Image Section) */}
         <div className="w-full md:w-1/2">
           <img
-            src={Images.beach_image}
-            alt="Beach"
+            src={Images.tides_images}
+            alt="tides"
             className="w-full h-full object-cover rounded-xl"
           />
         </div>
@@ -113,13 +109,12 @@ export const Login = () => {
             AD CONNECT
           </h1>
           <p className="text-lg text-gray-500 text-center mt-2">
-            Welcome back! Sign in to access your account and explore new
-            possibilities.
+            Welcome User! Sign up to start your journey and connect with peoples at real time.
           </p>
 
           <button className="btn bg-white text-black border-[#e5e5e5] mt-4 rounded google_btn" onClick={handelGoogleSignIn}>
             <img src={Images.google} alt="Google" />
-            Login with Google
+            Sign up with Google
           </button>
 
           <p className="text-center text-gray-600 mt-2 w-full">--OR--</p>
@@ -176,34 +171,27 @@ export const Login = () => {
                   checked={showPassword} 
                   onChange={() => setShowPassword(!showPassword)}
                 />
-                {showPassword ? 'Hide Password' : 'Show Password'}
+                Show Password
               </label>
             </fieldset>
 
             <button type="submit" className="btn btn-primary w-full rounded">
-              Sign In
+              Create Account
             </button>
           </form>
 
           <div className="flex flex-col md:flex-row items-center justify-between">
             <p className="text-sm text-gray-400 text-center mt-4">
-              <a href="#" className="text-blue-500 hover:underline">
-                Forgot Password
-              </a>
-            </p>
-
-            <p className="text-sm text-gray-400 text-center mt-4">
-              Don't have an account?{" "}
-              <a href="/signup" className="text-blue-500 hover:underline">
-                Sign up
+              Already have an account?{" "}
+              <a href="/" className="text-blue-500 hover:underline">
+                Sign in
               </a>
             </p>
           </div>
         </div>
       </div>
     </main>
-    </>
   );
 };
 
-export default Login;
+export default Signup;

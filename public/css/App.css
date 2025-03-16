@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 @plugin "daisyui" {
   themes: light,dark,black,acid,winter;
 }
@@ -8,4 +11,8 @@
 }
 .title-text {
   font-family: 'lg';
+}
+.fullScreenPreloader {
+  backdrop-filter: blur(2px);
+  backface-visibility: hidden;
 }
