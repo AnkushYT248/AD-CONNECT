@@ -1,4 +1,4 @@
-import { auth, signOut } from '../constend/firebase';
+import { auth, signOut, onAuthStateChanged } from '../constend/firebase';
 
 export const Home = () => {
   const handleSignOut = async () => {
@@ -9,11 +9,27 @@ export const Home = () => {
     } catch (error) {
        console.log(`error signing out ${error}`);
     }
-    
   }
+
+  const checkUserLoggedIn = () => {
+    try {
+      onAuthStateChanged(auth, (user) => {
+        if (!user) {
+          window.location.href = "/";
+        } else {
+          console.log(`user logged in`);
+        }
+      });
+    } catch (error) {
+       console.error(`${error}`);
+    }
+  };
+
+
+  checkUserLoggedIn();
   return (
     <>
-    <button onClick={handleSignOut}>Sign Out</button>
+    <buttton className="btn btn-primary" onClick={handleSignOut}>Sign Out</buttton>
     </>
   );
 };

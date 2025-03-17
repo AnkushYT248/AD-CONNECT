@@ -88,7 +88,7 @@ export const Login = () => {
        if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
       onAuthStateChanged(auth, (user) => {
         if (user) {
-          window.location.href = "/home";
+          window.location.href = "/wait";
         } else {
           console.log(`No user logged in`);
         }
