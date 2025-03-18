@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
+import { auth, onAuthStateChanged, db, doc, getDoc } from './firebase.js'
 
 export const OnBoard = () => {
-  const [step, setStep] = useState(1); // Track the current step
-  const [email, setEmail] = useState(''); // Store email input
-  const [code, setCode] = useState(''); // Store confirmation code
-  const [profile, setProfile] = useState({ name: '', bio: '' }); // Store profile data
+  const [step, setStep] = useState(1);
+  const [email, setEmail] = useState('');
+  const [code, setCode] = useState('');
+  const [profile, setProfile] = useState({ name: '', bio: '', profilePic: null });
 
-  // Handle step progression
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  // Handle form submission
   const handleSubmit = (e) => {
     e.preventDefault();
     if (step === 3) {
@@ -21,14 +20,45 @@ export const OnBoard = () => {
     }
   };
 
+  const handleProfilePicChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setProfile({ ...profile, profilePic: URL.createObjectURL(file) });
+    }
+  };
+
+
+  /*const checkUserStatus = async () => {
+    onAuthStateChanged(auth, async (user) => {
+      if(user) {
+        console.log(`user logged in`);
+        const userUid
+      }
+    })
+  }*/
+  //checkUserStatus();
   return (
+    <>
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
-      <div className="w-full max-w-md bg-base-100 p-8 rounded-lg shadow-lg">
+      <div className="flex flex-col items-center justify-center space-y-4">
+        <h1 className="title-text text-2xl">AD Connect</h1>
+      </div>
+      <div className="w-full max-w-lg bg-base-100 p-8 rounded-lg shadow-lg">
+        <div className="flex flex-col items-center mb-2">
+          <p>Few steps away to complete profile!</p>
+        </div>
+
         {/* Step Indicator */}
         <ul className="steps w-full mb-8">
-          <li className={`step ${step >= 1 ? 'step-primary' : ''}`}>Email Confirmation</li>
-          <li className={`step ${step >= 2 ? 'step-primary' : ''}`}>Complete Profile</li>
-          <li className={`step ${step >= 3 ? 'step-primary' : ''}`}>Finish</li>
+          <li className={`step ${step >= 1 ? 'step-primary' : ''} ${step === 1 ? 'font-bold text-lg' : ''}`}>
+            Email Confirmation
+          </li>
+          <li className={`step ${step >= 2 ? 'step-primary' : ''} ${step === 2 ? 'font-bold text-lg' : ''}`}>
+            Complete Profile
+          </li>
+          <li className={`step ${step >= 3 ? 'step-primary' : ''} ${step === 3 ? 'font-bold text-lg' : ''}`}>
+            Finish
+          </li>
         </ul>
 
         {/* Step 1: Email Confirmation */}
@@ -87,6 +117,24 @@ export const OnBoard = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-control">
               <label className="label">
+                <span className="label-text">Profile Picture</span>
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                className="input input-bordered w-full"
+                onChange={handleProfilePicChange}
+              />
+              {profile.profilePic && (
+                <img
+                  src={profile.profilePic}
+                  alt="Profile"
+                  className="w-24 h-24 mt-4 rounded-full object-cover border border-gray-300"
+                />
+              )}
+            </div>
+            <div className="form-control mt-4">
+              <label className="label">
                 <span className="label-text">Full Name</span>
               </label>
               <input
@@ -122,6 +170,7 @@ export const OnBoard = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

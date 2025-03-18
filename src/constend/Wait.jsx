@@ -32,6 +32,10 @@ export const Wait = () => {
                 theme: "dark",
                 status: "online",
                 profile_picture: user.photoURL || "",
+                bio: "No bio yet",
+                followers: 0,
+                following: 0,
+                isProfileComplete: false,
               });
               isNewUser = true;
             }
