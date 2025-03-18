@@ -1,5 +1,5 @@
 import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup,createUserWithEmailAndPassword,onAuthStateChanged, signOut } from "firebase/auth";
+import { getAuth, GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup,createUserWithEmailAndPassword,onAuthStateChanged, signOut, sendEmailVerification, sendSignInLinkToEmail, signInWithEmailLink } from "firebase/auth";
 import { getFirestore, collection, addDoc, doc, getDoc, updateDoc, deleteDoc, getDocs, query, where, serverTimestamp,writeBatch,setDoc } from "firebase/firestore";
 
 const firebaseConfig = {
@@ -18,4 +18,4 @@ const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
 const db = getFirestore(app);
 
-export { auth, googleProvider, signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, onAuthStateChanged, signOut , db, collection, addDoc, doc, getDoc, updateDoc, deleteDoc, getDocs, query, where,serverTimestamp, writeBatch, setDoc };
+export { auth, googleProvider, signInWithEmailAndPassword, signInWithPopup, createUserWithEmailAndPassword, onAuthStateChanged, signOut , db, collection, addDoc, doc, getDoc, updateDoc, deleteDoc, getDocs, query, where,serverTimestamp, writeBatch, setDoc, sendEmailVerification, sendSignInLinkToEmail, signInWithEmailLink };

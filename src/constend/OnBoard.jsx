@@ -1,22 +1,48 @@
-import React, { useState } from 'react';
-import { auth, onAuthStateChanged, db, doc, getDoc } from './firebase.js'
+import React, { useState, useEffect } from 'react';
+import { auth, onAuthStateChanged, db, doc, getDoc } from './firebase.js';
+import { sendSignInLinkToEmail } from 'firebase/auth';
 
 export const OnBoard = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
+  const [generatedCode, setGeneratedCode] = useState('');
+  const [isCodeVerified, setIsCodeVerified] = useState(false);
   const [profile, setProfile] = useState({ name: '', bio: '', profilePic: null });
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
+  // Generate a 6-digit random code
+  const generateCode = () => {
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  };
+
+  const sendVerificationCode = async () => {
+    const newCode = generateCode();
+    setGeneratedCode(newCode);
+    alert(`Your verification code is: ${newCode}`); // For development; use an email service in production
+  };
+
+  const verifyCode = () => {
+    if (code === generatedCode) {
+      setIsCodeVerified(true);
+      nextStep();
+    } else {
+      alert('Invalid code. Please try again.');
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (step === 3) {
+    if (step === 1) {
+      sendVerificationCode();
+      nextStep();
+    } else if (step === 2) {
+      verifyCode();
+    } else if (step === 3) {
       alert('Onboarding complete!');
       console.log({ email, code, profile });
-    } else {
-      nextStep();
     }
   };
 
@@ -27,37 +53,46 @@ export const OnBoard = () => {
     }
   };
 
+  useEffect(() => {
+    const checkUserResult = async () => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          const userId = user.uid;
+          setEmail(user.email);
+          try {
+            const userInfoRef = doc(db, `registred-users/${userId}/user_info`, 'info');
+            const userInfoSnap = await getDoc(userInfoRef);
 
-  /*const checkUserStatus = async () => {
-    onAuthStateChanged(auth, async (user) => {
-      if(user) {
-        console.log(`user logged in`);
-        const userUid
-      }
-    })
-  }*/
-  //checkUserStatus();
+            if (!userInfoSnap.exists()) throw new Error('User data not found');
+            const { username, isProfileComplete } = userInfoSnap.data();
+
+            if (isProfileComplete) {
+              window.location.href = '/home';
+            }
+          } catch (error) {
+            console.error('Error fetching user data:', error);
+          }
+        }
+      });
+    };
+
+    checkUserResult();
+  }, []);
+
   return (
-    <>
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <h1 className="title-text text-2xl">AD Connect</h1>
-      </div>
       <div className="w-full max-w-lg bg-base-100 p-8 rounded-lg shadow-lg">
-        <div className="flex flex-col items-center mb-2">
-          <p>Few steps away to complete profile!</p>
-        </div>
+        <h1 className="text-2xl font-bold mb-6 text-center">AD Connect</h1>
 
-        {/* Step Indicator */}
         <ul className="steps w-full mb-8">
-          <li className={`step ${step >= 1 ? 'step-primary' : ''} ${step === 1 ? 'font-bold text-lg' : ''}`}>
+          <li className={`step ${step >= 1 ? 'step-primary' : ''}`}>
             Email Confirmation
           </li>
-          <li className={`step ${step >= 2 ? 'step-primary' : ''} ${step === 2 ? 'font-bold text-lg' : ''}`}>
-            Complete Profile
+          <li className={`step ${step >= 2 ? 'step-primary' : ''}`}>
+            Code Verification
           </li>
-          <li className={`step ${step >= 3 ? 'step-primary' : ''} ${step === 3 ? 'font-bold text-lg' : ''}`}>
-            Finish
+          <li className={`step ${step >= 3 ? 'step-primary' : ''}`}>
+            Complete Profile
           </li>
         </ul>
 
@@ -66,42 +101,40 @@ export const OnBoard = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Enter your email</span>
+                <span className="label-text">Your Email</span>
               </label>
               <input
                 type="email"
-                placeholder="Email"
                 className="input input-bordered w-full"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                disabled
               />
             </div>
-            <div className="form-control mt-6">
+            <div className="form-control mt-4">
               <button type="submit" className="btn btn-primary w-full">
-                Send Confirmation Code
+                Send Verification Code
               </button>
             </div>
           </form>
         )}
 
-        {/* Step 2: Code Input */}
+        {/* Step 2: Code Verification */}
         {step === 2 && (
           <form onSubmit={handleSubmit}>
             <div className="form-control">
               <label className="label">
-                <span className="label-text">Enter the confirmation code</span>
+                <span className="label-text">Enter the verification code</span>
               </label>
               <input
                 type="text"
-                placeholder="Confirmation Code"
+                placeholder="6-digit code"
                 className="input input-bordered w-full"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
                 required
               />
             </div>
-            <div className="form-control mt-6">
+            <div className="form-control mt-4">
               <button type="button" className="btn btn-ghost mr-2" onClick={prevStep}>
                 Back
               </button>
@@ -113,7 +146,7 @@ export const OnBoard = () => {
         )}
 
         {/* Step 3: Complete Profile */}
-        {step === 3 && (
+        {step === 3 && isCodeVerified && (
           <form onSubmit={handleSubmit}>
             <div className="form-control">
               <label className="label">
@@ -129,7 +162,7 @@ export const OnBoard = () => {
                 <img
                   src={profile.profilePic}
                   alt="Profile"
-                  className="w-24 h-24 mt-4 rounded-full object-cover border border-gray-300"
+                  className="w-24 h-24 mt-4 rounded-full object-cover"
                 />
               )}
             </div>
@@ -159,10 +192,7 @@ export const OnBoard = () => {
               />
             </div>
             <div className="form-control mt-6">
-              <button type="button" className="btn btn-ghost mr-2" onClick={prevStep}>
-                Back
-              </button>
-              <button type="submit" className="btn btn-primary">
+              <button type="submit" className="btn btn-primary w-full">
                 Complete Onboarding
               </button>
             </div>
@@ -170,7 +200,6 @@ export const OnBoard = () => {
         )}
       </div>
     </div>
-    </>
   );
 };
 
