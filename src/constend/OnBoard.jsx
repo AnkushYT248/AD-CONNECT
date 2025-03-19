@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FullScreenPreloader } from "../components/FullScreenPreloader";
+import imageCompression from 'browser-image-compression';
 import {
   auth,
   onAuthStateChanged,
@@ -84,13 +85,29 @@ export const OnBoard = () => {
     }
   };
 
-  const getBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result);
-      reader.onerror = (error) => reject(error);
-    });
+  const getBase64 = async (file) => {
+    try {
+      // Compression options
+      const options = {
+        maxSizeMB: 0.5, // Target size in MB
+        maxWidthOrHeight: 1024, // Maximum width or height in pixels
+        useWebWorker: true,
+      };
+
+      // Compress the file
+      const compressedFile = await imageCompression(file, options);
+
+      // Convert to Base64
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(compressedFile);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = (error) => reject(error);
+      });
+    } catch (error) {
+      console.error("Error compressing image:", error);
+      throw error;
+    }
   };
 
   const handleSubmit = async (e) => {

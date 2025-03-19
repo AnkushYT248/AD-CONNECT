@@ -1,4 +1,5 @@
 import { auth, signOut, onAuthStateChanged } from '../constend/firebase';
+import { Navbar } from '../components/Navbar';
 
 export const Home = () => {
   const handleSignOut = async () => {
@@ -29,7 +30,7 @@ export const Home = () => {
   checkUserLoggedIn();
   return (
     <>
-    <buttton className="btn btn-primary" onClick={handleSignOut}>Sign Out</buttton>
+      <Navbar />
     </>
   );
 };
