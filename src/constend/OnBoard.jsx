@@ -1,14 +1,28 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from "react";
 import { FullScreenPreloader } from "../components/FullScreenPreloader";
-import { auth, onAuthStateChanged, db, doc, getDoc, updateDoc, serverTimestamp, signOut } from './firebase.js';
+import {
+  auth,
+  onAuthStateChanged,
+  db,
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp,
+  signOut,
+} from "./firebase.js";
 
 export const OnBoard = () => {
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState('');
-  const [code, setCode] = useState('');
+  const [email, setEmail] = useState("");
+  const [code, setCode] = useState("");
   const [isCodeVerified, setIsCodeVerified] = useState(false);
-  const [profile, setProfile] = useState({ name: '', bio: '', profilePic: null, previewUrl: null });
-  
+  const [profile, setProfile] = useState({
+    name: "",
+    bio: "",
+    profilePic: null,
+    previewUrl: null,
+  });
+
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
@@ -16,9 +30,9 @@ export const OnBoard = () => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if(user) {
+      if (user) {
         setEmail(user.email);
-      }else {
+      } else {
         console.log("User not logged in");
         window.location.href = "/";
       }
@@ -27,43 +41,46 @@ export const OnBoard = () => {
     return () => unsubscribe();
   }, []);
   const showAlert = (message, isSuccess) => {
-    const alertElement = document.querySelector('.alert');
-    alertElement.classList.remove('hidden', 'alert-error', 'alert-success');
-    alertElement.classList.add(isSuccess ? 'alert-success' : 'alert-error');
+    const alertElement = document.querySelector(".alert");
+    alertElement.classList.remove("hidden", "alert-error", "alert-success");
+    alertElement.classList.add(isSuccess ? "alert-success" : "alert-error");
     alertElement.textContent = message;
 
     // Hide the alert after 3 seconds
     setTimeout(() => {
-      alertElement.classList.add('hidden');
+      alertElement.classList.add("hidden");
     }, 3000);
   };
 
   const verifyCode = async () => {
     try {
-      if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
-      const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      if (preloaderRef.current) preloaderRef.current.classList.remove("hidden");
+      const response = await fetch(
+        "https://ad-connect-backend.onrender.com/api/auth/verify-otp",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, code }),
         },
-        body: JSON.stringify({ email, code }),
-      });
+      );
 
       const data = await response.json();
 
       if (response.ok) {
         setIsCodeVerified(true);
-        showAlert('Code verified successfully!', true);
+        showAlert("Code verified successfully!", true);
         nextStep();
-        if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+        if (preloaderRef.current) preloaderRef.current.classList.add("hidden");
       } else {
         showAlert(data.error, false);
-        if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+        if (preloaderRef.current) preloaderRef.current.classList.add("hidden");
       }
     } catch (error) {
-      console.error('Error verifying OTP:', error);
-      showAlert('Failed to verify OTP. Please try again.', false);
-      if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+      console.error("Error verifying OTP:", error);
+      showAlert("Failed to verify OTP. Please try again.", false);
+      if (preloaderRef.current) preloaderRef.current.classList.add("hidden");
     }
   };
 
@@ -72,7 +89,7 @@ export const OnBoard = () => {
       const reader = new FileReader();
       reader.readAsDataURL(file);
       reader.onload = () => resolve(reader.result);
-      reader.onerror = error => reject(error);
+      reader.onerror = (error) => reject(error);
     });
   };
 
@@ -81,53 +98,71 @@ export const OnBoard = () => {
 
     if (step === 1) {
       try {
-        if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
-        const response = await fetch('http://localhost:5000/api/auth/send-otp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        });
+        if (preloaderRef.current)
+          preloaderRef.current.classList.remove("hidden");
+        const response = await fetch(
+          "https://ad-connect-backend.onrender.com/api/auth/send-otp",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+          },
+        );
 
         const data = await response.json();
 
         if (response.ok) {
           showAlert(`OTP sent to ${email}`, true);
-          if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+          if (preloaderRef.current)
+            preloaderRef.current.classList.add("hidden");
           nextStep();
         } else {
           showAlert(data.error, false);
-          if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+          if (preloaderRef.current)
+            preloaderRef.current.classList.add("hidden");
         }
       } catch (error) {
-        console.error('Error sending OTP:', error);
-        showAlert('Failed to send OTP. Please try again.', false);
-        if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+        console.error("Error sending OTP:", error);
+        showAlert("Failed to send OTP. Please try again.", false);
+        if (preloaderRef.current) preloaderRef.current.classList.add("hidden");
       }
     } else if (step === 2) {
-      if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+      if (preloaderRef.current) preloaderRef.current.classList.add("hidden");
       verifyCode();
     } else if (step === 3) {
       try {
         const currentUser = auth.currentUser;
-        if (!currentUser) throw new Error('No user found');
+        if (!currentUser) throw new Error("No user found");
 
-        let profilePicBase64 = '';
+        let profilePicBase64 = "";
         if (profile.profilePic instanceof File) {
           profilePicBase64 = await getBase64(profile.profilePic);
         }
 
-        const userInfoRef = doc(db, `registred-users/${currentUser.uid}/user_info`, 'info');
+        const userInfoRef = doc(
+          db,
+          `registred-users/${currentUser.uid}/user_info`,
+          "info",
+        );
         const userInfoSnap = await getDoc(userInfoRef);
-        if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
+        if (preloaderRef.current)
+          preloaderRef.current.classList.remove("hidden");
 
         if (userInfoSnap.exists()) {
           const existingData = userInfoSnap.data();
 
           // Update only if fields have default values or are missing
           const updateData = {
-            username: existingData.username === 'Anonymous' ? profile.name : existingData.username,
-            bio: existingData.bio === 'No bio yet' ? profile.bio : existingData.bio,
-            profile_picture: existingData.profile_picture || profilePicBase64 || '',
+            username:
+              existingData.username === "Anonymous"
+                ? profile.name
+                : existingData.username,
+            bio:
+              existingData.bio === "No bio yet"
+                ? profile.bio
+                : existingData.bio,
+            profile_picture:
+              existingData.profile_picture || profilePicBase64 || "",
             isEmailVerified: true,
             isProfileComplete: true,
             account_updated: serverTimestamp(),
@@ -135,20 +170,22 @@ export const OnBoard = () => {
 
           await updateDoc(userInfoRef, updateData);
 
-          showAlert('Profile updated successfully!', true);
-          if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+          showAlert("Profile updated successfully!", true);
+          if (preloaderRef.current)
+            preloaderRef.current.classList.add("hidden");
           setTimeout(() => {
-            window.location.href = '/home';
+            window.location.href = "/home";
           }, 1500);
         } else {
-          console.error('User data not found');
-          showAlert('Failed to update profile. Please try again.', false);
-          if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+          console.error("User data not found");
+          showAlert("Failed to update profile. Please try again.", false);
+          if (preloaderRef.current)
+            preloaderRef.current.classList.add("hidden");
         }
       } catch (error) {
-        console.error('Error updating profile:', error);
-        showAlert('Failed to update profile. Please try again.', false);
-        if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+        console.error("Error updating profile:", error);
+        showAlert("Failed to update profile. Please try again.", false);
+        if (preloaderRef.current) preloaderRef.current.classList.add("hidden");
       }
     }
   };
@@ -160,17 +197,21 @@ export const OnBoard = () => {
           const userId = user.uid;
           setEmail(user.email);
           try {
-            const userInfoRef = doc(db, `registred-users/${userId}/user_info`, 'info');
+            const userInfoRef = doc(
+              db,
+              `registred-users/${userId}/user_info`,
+              "info",
+            );
             const userInfoSnap = await getDoc(userInfoRef);
 
-            if (!userInfoSnap.exists()) throw new Error('User data not found');
+            if (!userInfoSnap.exists()) throw new Error("User data not found");
             const { isProfileComplete } = userInfoSnap.data();
 
             if (isProfileComplete) {
-              window.location.href = '/home';
+              window.location.href = "/home";
             }
           } catch (error) {
-            console.error('Error fetching user data:', error);
+            console.error("Error fetching user data:", error);
           }
         }
       });
@@ -181,20 +222,22 @@ export const OnBoard = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
-      <FullScreenPreloader ref={preloaderRef}/>
+      <FullScreenPreloader ref={preloaderRef} />
       <div className="w-full max-w-lg bg-base-100 p-8 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center title-text">AD Connect</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center title-text">
+          AD Connect
+        </h1>
 
         <div className="alert rounded hidden"></div>
 
         <ul className="steps w-full mb-8">
-          <li className={`step ${step >= 1 ? 'step-primary' : ''}`}>
+          <li className={`step ${step >= 1 ? "step-primary" : ""}`}>
             Email Confirmation
           </li>
-          <li className={`step ${step >= 2 ? 'step-primary' : ''}`}>
+          <li className={`step ${step >= 2 ? "step-primary" : ""}`}>
             Code Verification
           </li>
-          <li className={`step ${step >= 3 ? 'step-primary' : ''}`}>
+          <li className={`step ${step >= 3 ? "step-primary" : ""}`}>
             Complete Profile
           </li>
         </ul>
@@ -214,7 +257,10 @@ export const OnBoard = () => {
               />
             </div>
             <div className="form-control mt-4">
-              <button type="submit" className="btn btn-primary w-full flex items-center justify-center">
+              <button
+                type="submit"
+                className="btn btn-primary w-full flex items-center justify-center"
+              >
                 Send Verification Code
               </button>
             </div>
@@ -238,7 +284,11 @@ export const OnBoard = () => {
               />
             </div>
             <div className="form-control mt-4">
-              <button type="button" className="btn btn-ghost mr-2" onClick={prevStep}>
+              <button
+                type="button"
+                className="btn btn-ghost mr-2"
+                onClick={prevStep}
+              >
                 Back
               </button>
               <button type="submit" className="btn btn-primary">
@@ -284,7 +334,9 @@ export const OnBoard = () => {
                 placeholder="Full Name"
                 className="input input-bordered w-full"
                 value={profile.name}
-                onChange={(e) => setProfile({ ...profile, name: e.target.value })}
+                onChange={(e) =>
+                  setProfile({ ...profile, name: e.target.value })
+                }
                 required
               />
             </div>
@@ -296,7 +348,9 @@ export const OnBoard = () => {
                 placeholder="Tell us about yourself"
                 className="textarea textarea-bordered w-full"
                 value={profile.bio}
-                onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
+                onChange={(e) =>
+                  setProfile({ ...profile, bio: e.target.value })
+                }
                 required
               />
             </div>
@@ -307,21 +361,23 @@ export const OnBoard = () => {
             </div>
           </form>
         )}
-        <button 
+        <button
           onClick={async () => {
             try {
-              if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
+              if (preloaderRef.current)
+                preloaderRef.current.classList.remove("hidden");
               await signOut(auth);
-              showAlert('Logged out successfully', true);
+              showAlert("Logged out successfully", true);
               setTimeout(() => {
-                window.location.href = '/';
+                window.location.href = "/";
               }, 1500);
             } catch (error) {
-              showAlert('Error logging out', false);
+              showAlert("Error logging out", false);
             } finally {
-              if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+              if (preloaderRef.current)
+                preloaderRef.current.classList.add("hidden");
             }
-          }} 
+          }}
           className="btn btn-secondary text-white rounded-lg p-2 mt-3 m-auto"
         >
           Logout
