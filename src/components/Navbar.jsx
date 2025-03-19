@@ -55,8 +55,8 @@ export const Navbar = () => {
                   <li onClick={() => setTheme('dark')}>
                     <a><CgDarkMode /> Dark {theme === 'dark' && <GrRadialSelected className="inline ml-2" />}</a>
                   </li>
-                  <li onClick={() => setTheme('light')}>
-                    <a><FaSun /> Light {theme === 'light' && <GrRadialSelected className="inline ml-2" />}</a>
+                  <li onClick={() => setTheme('winter')}>
+                    <a><FaSun /> Light {theme === 'winter' && <GrRadialSelected className="inline ml-2" />}</a>
                   </li>
                   <li onClick={() => setTheme('black')}>
                     <a><MdDarkMode /> Default (Black) {theme === 'black' && <GrRadialSelected className="inline ml-2" />}</a>
