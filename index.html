@@ -1,8 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" data-theme="">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/public/images/brand/ad_ultra.png" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="/public/images/brand/ad_ultra.png"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>AD Connect</title>
   </head>
@@ -11,3 +15,7 @@
     <script type="module" src="/src/index.jsx"></script>
   </body>
 </html>
+<script>
+  const theme = localStorage.getItem("theme") || "black";
+  document.documentElement.setAttribute("data-theme", theme);
+</script>
