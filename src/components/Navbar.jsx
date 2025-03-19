@@ -1,19 +1,30 @@
 import { BsThreeDotsVertical } from "react-icons/bs";
-import { FaPlus } from "react-icons/fa6";
-import { FaUserPlus } from "react-icons/fa6";
 import { GiTalk } from "react-icons/gi";
 import { TiMessages } from "react-icons/ti";
 import { IoMdArchive } from "react-icons/io";
 import { FcInvite } from "react-icons/fc";
+import { useEffect, useState } from 'react';
 import { RiProfileLine } from "react-icons/ri";
 import { IoMdSettings } from "react-icons/io";
 import { SiGnuprivacyguard } from "react-icons/si";
 import { IoIosHelpCircle } from "react-icons/io";
 import { SiAltiumdesigner } from "react-icons/si";
 import { CiLogout } from "react-icons/ci";
-import { handleSignOut } from '../util/FirebaseHelper.jsx'
+import { handleSignOut } from '../util/FirebaseHelper.jsx';
+import { FaPlus, FaUserPlus } from 'react-icons/fa';
+import { GiTalk } from 'react-icons/gi';
+import { TiMessages } from 'react-icons/ti';
+import { IoMdArchive } from 'react-icons/io';
+import { FcInvite } from 'react-icons/fc';
 
 export const Navbar = () => {
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'black');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
   return (
     <>
       <div className="navbar bg-base-200 shadow-sm">
@@ -28,14 +39,34 @@ export const Navbar = () => {
               role="button"
               className="btn btn-ghost btn-circle"
             >
-              <BsThreeDotsVertical className="w-[25px] h-[25px]" />
+              <BsThreeDotsVertical className="w-6 h-6" />
             </div>
             <ul
               tabIndex={0}
-              className="menu rounded-lg flex flex-col gap-3 menu-base dropdown-content bg-base-300 rounded-box z-1 mt-3 w-52 p-2 shadow"
+              className="menu rounded-lg flex flex-col gap-3 menu-sm dropdown-content bg-base-300 rounded-box z-1 mt-3 w-52 p-2 shadow"
             >
+              <div className="dropdown dropdown-end">
+                <li tabIndex={0}>
+                  <a>Theme</a>
+                </li>
+                <ul
+                  tabIndex={0}
+                  className="menu rounded-lg flex flex-col gap-3 menu-sm dropdown-content bg-base-200 rounded-box z-1 mt-3 w-52 p-2 shadow"
+                >
+                  <li onClick={() => setTheme('dark')}>
+                    <a><FaPlus /> Dark</a>
+                  </li>
+                  <li onClick={() => setTheme('light')}>
+                    <a><FaUserPlus /> Light</a>
+                  </li>
+                  <li onClick={() => setTheme('black')}>
+                    <a><FaUserPlus /> Default (Black)</a>
+                  </li>
+                </ul>
+              </div>
+              <hr />
               <li>
-                <a><FaPlus />New Group</a>
+                <a><FaPlus /> New Group</a>
               </li>
               <li>
                 <a><FaUserPlus /> Add Friends</a>
@@ -63,7 +94,7 @@ export const Navbar = () => {
               role="button"
               className="btn btn-ghost btn-circle avatar"
             >
-              <div className="w-10 rounded-full">
+              <div className="w-8 rounded-full">
                 <img
                   alt="Profile"
                   src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
@@ -77,8 +108,8 @@ export const Navbar = () => {
               <li>
                 <a className="justify-between">
                   <div className="flex flex-row gap-2 items-center">
-                  <RiProfileLine />
-                  Profile
+                    <RiProfileLine />
+                    Profile
                   </div>
                   <span className="badge">New</span>
                 </a>
@@ -86,27 +117,32 @@ export const Navbar = () => {
               <li>
                 <a> 
                   <IoMdSettings />
-                  Settings</a>
+                  Settings
+                </a>
               </li>
               <li>
                 <a>
                   <SiGnuprivacyguard />
-                  Privacy & Security</a>
+                  Privacy & Security
+                </a>
               </li>
               <li>
                 <a>
                   <IoIosHelpCircle />
-                  Help & Support</a>
+                  Help & Support
+                </a>
               </li>
               <li>
                 <a>
                   <SiAltiumdesigner />
-                  Appearance</a>
+                  Appearance
+                </a>
               </li>
               <li onClick={handleSignOut}>
                 <a className="text-red-500">
                   <CiLogout />
-                  Logout</a>
+                  Logout
+                </a>
               </li>
             </ul>
           </div>
