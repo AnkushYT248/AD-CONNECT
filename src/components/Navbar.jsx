@@ -15,6 +15,7 @@ import { FaSun } from "react-icons/fa";
 import { CgDarkMode } from "react-icons/cg";
 import { FaAffiliatetheme } from "react-icons/fa6";
 import { GrRadialSelected } from "react-icons/gr";
+import {Dialog} from "../components/Dialog.jsx"
 
 export const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'black');
