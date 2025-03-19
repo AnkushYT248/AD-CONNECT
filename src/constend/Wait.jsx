@@ -13,15 +13,21 @@ export const Wait = () => {
           const userDocRef = doc(db, "registred-users", user.uid);
           const userDocSnap = await getDoc(userDocRef);
 
+          let isProfileComplete = false;
+
           if (userDocSnap.exists()) {
             setWaitText("Status: User logged in and account found");
+
+            // Check if the profile is complete
+            const userInfoRef = doc(db, `registred-users/${user.uid}/user_info`, "info");
+            const userInfoSnap = await getDoc(userInfoRef);
+            if (userInfoSnap.exists()) {
+              isProfileComplete = userInfoSnap.data().isProfileComplete;
+            }
           } else {
             // Create new user data using batch write for atomic creation
             const batch = writeBatch(db);
 
-            let isNewUser = false;
-
-            // Create user_info only if it doesn't exist
             const userInfoRef = doc(db, `registred-users/${user.uid}/user_info`, "info");
             const userInfoSnap = await getDoc(userInfoRef);
             if (!userInfoSnap.exists()) {
@@ -35,58 +41,47 @@ export const Wait = () => {
                 bio: "No bio yet",
                 followers: 0,
                 following: 0,
-                isProfileComplete: false,
+                isProfileComplete: false, // Default to false
                 isEmailVerified: false,
               });
-              isNewUser = true;
             }
 
-            // Initialize empty userFriends collection if it doesn't exist
+            // Initialize other collections if they don't exist
             const userFriendsRef = doc(db, `registred-users/${user.uid}/userFriends`, "friends");
-            const userFriendsSnap = await getDoc(userFriendsRef);
-            if (!userFriendsSnap.exists()) {
-              batch.set(userFriendsRef, {
-                friends: [], // Initialize as empty array
-              });
-              isNewUser = true;
+            if (!(await getDoc(userFriendsRef)).exists()) {
+              batch.set(userFriendsRef, { friends: [] });
             }
 
-            // Initialize empty userChats collection if it doesn't exist
             const userChatsRef = doc(db, `registred-users/${user.uid}/userChats`, "chats");
-            const userChatsSnap = await getDoc(userChatsRef);
-            if (!userChatsSnap.exists()) {
+            if (!(await getDoc(userChatsRef)).exists()) {
               batch.set(userChatsRef, {});
-              isNewUser = true;
             }
 
-            // Initialize empty userDocuments collection if it doesn't exist
             const userDocumentsRef = doc(db, `registred-users/${user.uid}/userDocuments`, "documents");
-            const userDocumentsSnap = await getDoc(userDocumentsRef);
-            if (!userDocumentsSnap.exists()) {
+            if (!(await getDoc(userDocumentsRef)).exists()) {
               batch.set(userDocumentsRef, {});
-              isNewUser = true;
             }
 
-            if (isNewUser) {
-              await batch.commit(); // Commit only if new data is created
-              setWaitText("Status: User logged in and account created");
+            await batch.commit();
+            setWaitText("Status: User logged in and account created");
+            isProfileComplete = false;
+          }
+
+          // Redirect based on profile completion status
+          if (isProfileComplete) {
+            setTimeout(() => {
+              setWaitText("Redirecting to home page...");
               setTimeout(() => {
-                setIsLoading(true);
-                setWaitText("Redirecting to next page ")
-                setTimeout(() => {
-                  window.location.href = "/onboard";
-                },1500)
-              }, 1000)
-            } else {
-              setWaitText("Status: User logged in and account found");
-              setTimeout(()=> {
-                setIsLoading(true);
-                setWaitText("Redirecting to home page ")
-                setTimeout(() => {
-                  window.location.href = "/home";
-                },1500)
-              })
-            }
+                window.location.href = "/home";
+              }, 1500);
+            }, 1000);
+          } else {
+            setTimeout(() => {
+              setWaitText("Redirecting to onboarding page...");
+              setTimeout(() => {
+                window.location.href = "/onboard";
+              }, 1500);
+            }, 1000);
           }
         } catch (error) {
           console.error(`${error}`);
