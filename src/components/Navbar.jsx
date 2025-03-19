@@ -26,6 +26,17 @@ export const Navbar = () => {
 
   return (
     <>
+      <dialog id="my_modal_3" className="modal">
+        <div className="modal-box">
+          <form method="dialog">
+            {/* if there is a button in form, it will close the modal */}
+            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
+          </form>
+          <h3 className="font-bold text-lg">Hello!</h3>
+          <p className="py-4">Press ESC key or click on ✕ button to close</p>
+        </div>
+      </dialog>
+      
       <div className="navbar bg-base-200 shadow-sm">
         <div className="flex-1">
           <a className="btn btn-ghost text-xl title-text">AD CONNECT</a>
@@ -68,7 +79,7 @@ export const Navbar = () => {
                 <a><FaPlus /> New Group</a>
               </li>
               <li>
-                <a><FaUserPlus /> Add Friends</a>
+                <a><FaUserPlus onClick={()=>document.getElementById('my_modal_3').showModal()}/> Add Friend</a>
               </li>
               <li>
                 <a><GiTalk /> Communications</a>
