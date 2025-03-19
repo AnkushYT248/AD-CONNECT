@@ -307,7 +307,25 @@ export const OnBoard = () => {
             </div>
           </form>
         )}
-        <button className="btn btn-secondary text-white rounded-lg p-2 mt-3 m-auto">Logout</button>
+        <button 
+          onClick={async () => {
+            try {
+              if(preloaderRef.current) preloaderRef.current.classList.remove('hidden');
+              await signOut(auth);
+              showAlert('Logged out successfully', true);
+              setTimeout(() => {
+                window.location.href = '/';
+              }, 1500);
+            } catch (error) {
+              showAlert('Error logging out', false);
+            } finally {
+              if(preloaderRef.current) preloaderRef.current.classList.add('hidden');
+            }
+          }} 
+          className="btn btn-secondary text-white rounded-lg p-2 mt-3 m-auto"
+        >
+          Logout
+        </button>
       </div>
     </div>
   );
