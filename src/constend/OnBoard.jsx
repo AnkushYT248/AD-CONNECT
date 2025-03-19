@@ -14,16 +14,16 @@ export const OnBoard = () => {
 
   const preloaderRef = useRef(null);
 
-  const setEmailText = () => {
-  onAuthStateChanged(auth, async (user) => {
-    if(user) {
-      setEmail(user.email);
-      console.log(user.email);
-    }
-  });
-  }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if(user) {
+        setEmail(user.email);
+        console.log(user.email);
+      }
+    });
 
-  setEmailText();
+    return () => unsubscribe();
+  }, []);
   const showAlert = (message, isSuccess) => {
     const alertElement = document.querySelector('.alert');
     alertElement.classList.remove('hidden', 'alert-error', 'alert-success');
