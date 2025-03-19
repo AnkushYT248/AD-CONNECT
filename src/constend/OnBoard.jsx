@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { auth, onAuthStateChanged, db, doc, getDoc } from './firebase.js';
+import { auth, onAuthStateChanged, db, doc, getDoc, updateDoc, serverTimestamp } from './firebase.js';
 
 export const OnBoard = () => {
   const [step, setStep] = useState(1);
@@ -48,6 +48,15 @@ export const OnBoard = () => {
     }
   };
 
+  const getBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -76,8 +85,33 @@ export const OnBoard = () => {
     } else if (step === 2) {
       verifyCode();
     } else if (step === 3) {
-      showAlert('Onboarding complete!', true);
-      console.log({ email, code, profile });
+      try {
+        const currentUser = auth.currentUser;
+        if (!currentUser) throw new Error('No user found');
+
+        let profilePicBase64 = '';
+        if (profile.profilePic instanceof File) {
+          profilePicBase64 = await getBase64(profile.profilePic);
+        }
+
+        const userInfoRef = doc(db, `registred-users/${currentUser.uid}/user_info`, 'info');
+        await updateDoc(userInfoRef, {
+          username: profile.name,
+          bio: profile.bio,
+          profile_picture: profilePicBase64 || '',
+          isEmailVerified: true,
+          isProfileComplete: true,
+          account_updated: serverTimestamp()
+        });
+
+        showAlert('Profile updated successfully!', true);
+        setTimeout(() => {
+          window.location.href = '/home';
+        }, 1500);
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        showAlert('Failed to update profile. Please try again.', false);
+      }
     }
   };
 
@@ -193,7 +227,14 @@ export const OnBoard = () => {
                 type="file"
                 accept="image/*"
                 className="input input-bordered w-full"
-                onChange={handleProfilePicChange}
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setProfile({ ...profile, profilePic: file });
+                    const previewUrl = URL.createObjectURL(file);
+                    document.querySelector('.profile-preview').src = previewUrl;
+                  }
+                }}
               />
               {profile.profilePic && (
                 <img
