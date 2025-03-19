@@ -25,13 +25,20 @@ export const OnBoard = () => {
 
           if (response.ok) {
               setIsCodeVerified(true);
+              document.querySelector('.alert').classList.remove('hidden', 'alert-error');
+              document.querySelector('.alert').classList.add('alert-success');
+              document.querySelector('.alert').textContent = 'Code verified successfully!';
               nextStep();
           } else {
-              alert(data.error);
+              document.querySelector('.alert').classList.remove('hidden', 'alert-success');
+              document.querySelector('.alert').classList.add('alert-error');
+              document.querySelector('.alert').textContent = data.error;
           }
       } catch (error) {
           console.error('Error verifying OTP:', error);
-          alert('Failed to verify OTP. Please try again.');
+          document.querySelector('.alert').classList.remove('hidden', 'alert-success');
+          document.querySelector('.alert').classList.add('alert-error');
+          document.querySelector('.alert').textContent = 'Failed to verify OTP. Please try again.';
       }
   };
 
@@ -51,19 +58,27 @@ export const OnBoard = () => {
         const data = await response.json();
 
         if (response.ok) {
-          alert(`OTP sent to ${email}`);
+          document.querySelector('.alert').classList.remove('hidden', 'alert-error');
+          document.querySelector('.alert').classList.add('alert-success');
+          document.querySelector('.alert').textContent = `OTP sent to ${email}`;
           nextStep();
         } else {
-          alert(data.error);
+          document.querySelector('.alert').classList.remove('hidden', 'alert-success');
+          document.querySelector('.alert').classList.add('alert-error');
+          document.querySelector('.alert').textContent = data.error;
         }
       } catch (error) {
         console.error('Error sending OTP:', error);
-        alert('Failed to send OTP. Please try again.');
+        document.querySelector('.alert').classList.remove('hidden', 'alert-success');
+        document.querySelector('.alert').classList.add('alert-error');
+        document.querySelector('.alert').textContent = 'Failed to send OTP. Please try again.';
       }
     } else if (step === 2) {
       verifyCode();
     } else if (step === 3) {
-      alert('Onboarding complete!');
+      document.querySelector('.alert').classList.remove('hidden', 'alert-error');
+      document.querySelector('.alert').classList.add('alert-success');
+      document.querySelector('.alert').textContent = 'Onboarding complete!';
       console.log({ email, code, profile });
     }
   };
