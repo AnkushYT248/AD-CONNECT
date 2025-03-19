@@ -18,7 +18,9 @@ export const OnBoard = () => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if(user) {
         setEmail(user.email);
-        console.log(user.email);
+      }else {
+        console.log("User not logged in");
+        window.location.href = "/";
       }
     });
 
