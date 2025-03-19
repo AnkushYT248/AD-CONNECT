@@ -53,13 +53,13 @@ export const Navbar = () => {
                   className="menu rounded-lg flex flex-col gap-3 menu-sm dropdown-content bg-base-200 rounded-box z-1 mt-3 w-52 p-2 shadow"
                 >
                   <li onClick={() => setTheme('dark')}>
-                    <a><CgDarkMode /> Dark</a>
+                    <a><CgDarkMode /> Dark {theme === 'dark' && <GrRadialSelected className="inline ml-2" />}</a>
                   </li>
                   <li onClick={() => setTheme('light')}>
-                    <a><FaSun /> Light</a>
+                    <a><FaSun /> Light {theme === 'light' && <GrRadialSelected className="inline ml-2" />}</a>
                   </li>
                   <li onClick={() => setTheme('black')}>
-                    <a><MdDarkMode /> Default (Black)</a>
+                    <a><MdDarkMode /> Default (Black) {theme === 'black' && <GrRadialSelected className="inline ml-2" />}</a>
                   </li>
                 </ul>
               </div>
