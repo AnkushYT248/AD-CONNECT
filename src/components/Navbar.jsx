@@ -18,6 +18,7 @@ import { GrRadialSelected } from "react-icons/gr";
 
 export const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'black');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -26,16 +27,13 @@ export const Navbar = () => {
 
   return (
     <>
-      <dialog id="my_modal_3" className="modal">
-        <div className="modal-box">
-          <form method="dialog">
-            {/* if there is a button in form, it will close the modal */}
-            <button className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-          </form>
-          <h3 className="font-bold text-lg">Hello!</h3>
-          <p className="py-4">Press ESC key or click on ✕ button to close</p>
+      <Dialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
+        <h3 className="font-bold text-lg">Add Friend</h3>
+        <div className="py-4">
+          <input type="text" placeholder="Enter email or username" className="input input-bordered w-full" />
+          <button className="btn btn-primary mt-4">Send Request</button>
         </div>
-      </dialog>
+      </Dialog>
       
       <div className="navbar bg-base-200 shadow-sm">
         <div className="flex-1">
@@ -79,7 +77,7 @@ export const Navbar = () => {
                 <a><FaPlus /> New Group</a>
               </li>
               <li>
-                <a><FaUserPlus onClick={()=>document.getElementById('my_modal_3').showModal()}/> Add Friend</a>
+                <a onClick={() => setIsDialogOpen(true)}><FaUserPlus /> Add Friend</a>
               </li>
               <li>
                 <a><GiTalk /> Communications</a>
