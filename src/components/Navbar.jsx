@@ -1,21 +1,15 @@
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { GiTalk } from "react-icons/gi";
 import { TiMessages } from "react-icons/ti";
-import { IoMdArchive } from "react-icons/io";
+import { IoMdArchive, IoMdSettings } from "react-icons/io";
 import { FcInvite } from "react-icons/fc";
 import { useEffect, useState } from 'react';
 import { RiProfileLine } from "react-icons/ri";
-import { IoMdSettings } from "react-icons/io";
-import { SiGnuprivacyguard } from "react-icons/si";
+import { SiGnuprivacyguard, SiAltiumdesigner } from "react-icons/si";
 import { IoIosHelpCircle } from "react-icons/io";
-import { SiAltiumdesigner } from "react-icons/si";
 import { CiLogout } from "react-icons/ci";
 import { handleSignOut } from '../util/FirebaseHelper.jsx';
 import { FaPlus, FaUserPlus } from 'react-icons/fa';
-import { GiTalk } from 'react-icons/gi';
-import { TiMessages } from 'react-icons/ti';
-import { IoMdArchive } from 'react-icons/io';
-import { FcInvite } from 'react-icons/fc';
 
 export const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'black');
