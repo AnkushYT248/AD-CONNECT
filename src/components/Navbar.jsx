@@ -10,6 +10,11 @@ import { IoIosHelpCircle } from "react-icons/io";
 import { CiLogout } from "react-icons/ci";
 import { handleSignOut } from '../util/FirebaseHelper.jsx';
 import { FaPlus, FaUserPlus } from 'react-icons/fa';
+import { MdDarkMode } from "react-icons/md";
+import { FaSun } from "react-icons/fa";
+import { CgDarkMode } from "react-icons/cg";
+import { FaAffiliatetheme } from "react-icons/fa6";
+import { GrRadialSelected } from "react-icons/gr";
 
 export const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'black');
@@ -41,20 +46,20 @@ export const Navbar = () => {
             >
               <div className="dropdown dropdown-end">
                 <li tabIndex={0}>
-                  <a>Theme</a>
+                  <a><FaAffiliatetheme /> Theme</a>
                 </li>
                 <ul
                   tabIndex={0}
                   className="menu rounded-lg flex flex-col gap-3 menu-sm dropdown-content bg-base-200 rounded-box z-1 mt-3 w-52 p-2 shadow"
                 >
                   <li onClick={() => setTheme('dark')}>
-                    <a><FaPlus /> Dark</a>
+                    <a><CgDarkMode /> Dark</a>
                   </li>
                   <li onClick={() => setTheme('light')}>
-                    <a><FaUserPlus /> Light</a>
+                    <a><FaSun /> Light</a>
                   </li>
                   <li onClick={() => setTheme('black')}>
-                    <a><FaUserPlus /> Default (Black)</a>
+                    <a><MdDarkMode /> Default (Black)</a>
                   </li>
                 </ul>
               </div>
