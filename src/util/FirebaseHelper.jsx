@@ -1,13 +1,23 @@
+
 import { auth, signOut, onAuthStateChanged } from '../constend/firebase';
 
 const handleSignOut = async () => {
   try {
-     await signOut(auth);
-
-    console.log(`user signed out`);
+    await signOut(auth);
+    window.location.href = '/';
+    return { success: true };
   } catch (error) {
-     console.log(`error signing out ${error}`);
+    console.error('Error signing out:', error);
+    return { success: false, error };
   }
-}
+};
 
-export {handleSignOut};
+const getCurrentUser = () => {
+  return auth.currentUser;
+};
+
+const listenToAuthChanges = (callback) => {
+  return onAuthStateChanged(auth, callback);
+};
+
+export { handleSignOut, getCurrentUser, listenToAuthChanges };
