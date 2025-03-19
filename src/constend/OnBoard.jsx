@@ -11,35 +11,41 @@ export const OnBoard = () => {
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
+  const showAlert = (message, isSuccess) => {
+    const alertElement = document.querySelector('.alert');
+    alertElement.classList.remove('hidden', 'alert-error', 'alert-success');
+    alertElement.classList.add(isSuccess ? 'alert-success' : 'alert-error');
+    alertElement.textContent = message;
+
+    // Hide the alert after 3 seconds
+    setTimeout(() => {
+      alertElement.classList.add('hidden');
+    }, 3000);
+  };
+
   const verifyCode = async () => {
-      try {
-          const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
-              method: 'POST',
-              headers: {
-                  'Content-Type': 'application/json',
-              },
-              body: JSON.stringify({ email, code }),
-          });
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, code }),
+      });
 
-          const data = await response.json();
+      const data = await response.json();
 
-          if (response.ok) {
-              setIsCodeVerified(true);
-              document.querySelector('.alert').classList.remove('hidden', 'alert-error');
-              document.querySelector('.alert').classList.add('alert-success');
-              document.querySelector('.alert').textContent = 'Code verified successfully!';
-              nextStep();
-          } else {
-              document.querySelector('.alert').classList.remove('hidden', 'alert-success');
-              document.querySelector('.alert').classList.add('alert-error');
-              document.querySelector('.alert').textContent = data.error;
-          }
-      } catch (error) {
-          console.error('Error verifying OTP:', error);
-          document.querySelector('.alert').classList.remove('hidden', 'alert-success');
-          document.querySelector('.alert').classList.add('alert-error');
-          document.querySelector('.alert').textContent = 'Failed to verify OTP. Please try again.';
+      if (response.ok) {
+        setIsCodeVerified(true);
+        showAlert('Code verified successfully!', true);
+        nextStep();
+      } else {
+        showAlert(data.error, false);
       }
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+      showAlert('Failed to verify OTP. Please try again.', false);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -58,27 +64,19 @@ export const OnBoard = () => {
         const data = await response.json();
 
         if (response.ok) {
-          document.querySelector('.alert').classList.remove('hidden', 'alert-error');
-          document.querySelector('.alert').classList.add('alert-success');
-          document.querySelector('.alert').textContent = `OTP sent to ${email}`;
+          showAlert(`OTP sent to ${email}`, true);
           nextStep();
         } else {
-          document.querySelector('.alert').classList.remove('hidden', 'alert-success');
-          document.querySelector('.alert').classList.add('alert-error');
-          document.querySelector('.alert').textContent = data.error;
+          showAlert(data.error, false);
         }
       } catch (error) {
         console.error('Error sending OTP:', error);
-        document.querySelector('.alert').classList.remove('hidden', 'alert-success');
-        document.querySelector('.alert').classList.add('alert-error');
-        document.querySelector('.alert').textContent = 'Failed to send OTP. Please try again.';
+        showAlert('Failed to send OTP. Please try again.', false);
       }
     } else if (step === 2) {
       verifyCode();
     } else if (step === 3) {
-      document.querySelector('.alert').classList.remove('hidden', 'alert-error');
-      document.querySelector('.alert').classList.add('alert-success');
-      document.querySelector('.alert').textContent = 'Onboarding complete!';
+      showAlert('Onboarding complete!', true);
       console.log({ email, code, profile });
     }
   };
@@ -101,12 +99,10 @@ export const OnBoard = () => {
             const userInfoSnap = await getDoc(userInfoRef);
 
             if (!userInfoSnap.exists()) throw new Error('User data not found');
-            const { username, isProfileComplete } = userInfoSnap.data();
+            const { username, isProfileComplete, bio, profile_picture, isEmailVerified } = userInfoSnap.data();
 
             if (isProfileComplete) {
               window.location.href = '/home';
-            }else {
-              
             }
           } catch (error) {
             console.error('Error fetching user data:', error);
@@ -122,10 +118,9 @@ export const OnBoard = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
       <div className="w-full max-w-lg bg-base-100 p-8 rounded-lg shadow-lg">
         <h1 className="text-2xl font-bold mb-6 text-center title-text">AD Connect</h1>
-        
-        <div class="alert rounded hidden">
-        </div>
-        
+
+        <div className="alert rounded hidden"></div>
+
         <ul className="steps w-full mb-8">
           <li className={`step ${step >= 1 ? 'step-primary' : ''}`}>
             Email Confirmation

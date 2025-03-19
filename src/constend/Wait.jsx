@@ -36,6 +36,7 @@ export const Wait = () => {
                 followers: 0,
                 following: 0,
                 isProfileComplete: false,
+                isEmailVerified: false,
               });
               isNewUser = true;
             }
