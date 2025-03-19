@@ -14,15 +14,18 @@ export const Wait = () => {
           const userDocSnap = await getDoc(userDocRef);
 
           let isProfileComplete = false;
+          let isEmailVerified = false;
 
           if (userDocSnap.exists()) {
             setWaitText("Status: User logged in and account found");
 
-            // Check if the profile is complete
+            // Check if the profile is complete and email is verified
             const userInfoRef = doc(db, `registred-users/${user.uid}/user_info`, "info");
             const userInfoSnap = await getDoc(userInfoRef);
             if (userInfoSnap.exists()) {
-              isProfileComplete = userInfoSnap.data().isProfileComplete;
+              const userData = userInfoSnap.data();
+              isProfileComplete = userData.isProfileComplete || false;
+              isEmailVerified = userData.isEmailVerified || false;
             }
           } else {
             // Create new user data using batch write for atomic creation
@@ -41,8 +44,8 @@ export const Wait = () => {
                 bio: "No bio yet",
                 followers: 0,
                 following: 0,
-                isProfileComplete: false, // Default to false
-                isEmailVerified: false,
+                isProfileComplete: false,
+                isEmailVerified: user.emailVerified || false, // Capture email verification status
               });
             }
 
@@ -65,10 +68,11 @@ export const Wait = () => {
             await batch.commit();
             setWaitText("Status: User logged in and account created");
             isProfileComplete = false;
+            isEmailVerified = user.emailVerified || false;
           }
 
-          // Redirect based on profile completion status
-          if (isProfileComplete) {
+          // Redirect based on profile completion and email verification status
+          if (isProfileComplete && isEmailVerified) {
             setTimeout(() => {
               setWaitText("Redirecting to home page...");
               setTimeout(() => {
@@ -84,7 +88,7 @@ export const Wait = () => {
             }, 1000);
           }
         } catch (error) {
-          console.error(`${error}`);
+          console.error(`Error: ${error}`);
           setWaitText("Error checking or creating user account");
         } finally {
           setIsLoading(false);

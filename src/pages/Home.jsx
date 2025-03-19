@@ -2,16 +2,6 @@ import { auth, signOut, onAuthStateChanged } from '../constend/firebase';
 import { Navbar } from '../components/Navbar';
 
 export const Home = () => {
-  const handleSignOut = async () => {
-    try {
-       await signOut(auth);
-
-      console.log(`user signed out`);
-    } catch (error) {
-       console.log(`error signing out ${error}`);
-    }
-  }
-
   const checkUserLoggedIn = () => {
     try {
       onAuthStateChanged(auth, (user) => {

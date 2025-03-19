@@ -5,7 +5,7 @@ import { Signup } from './pages/Signup';
 import { Home } from './pages/Home';
 import { ForgotPassword } from './pages/ForgotPassword';
 import { Wait } from './constend/Wait';
-  import { OnBoard } from './constend/OnBoard';
+import { OnBoard } from './constend/OnBoard';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 export default function App() {

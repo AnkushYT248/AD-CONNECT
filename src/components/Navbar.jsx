@@ -11,6 +11,7 @@ import { SiGnuprivacyguard } from "react-icons/si";
 import { IoIosHelpCircle } from "react-icons/io";
 import { SiAltiumdesigner } from "react-icons/si";
 import { CiLogout } from "react-icons/ci";
+import { handleSignOut } from '../util/FirebaseHelper.jsx'
 
 export const Navbar = () => {
   return (
