@@ -6,7 +6,7 @@ export const OnBoard = () => {
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
   const [isCodeVerified, setIsCodeVerified] = useState(false);
-  const [profile, setProfile] = useState({ name: '', bio: '', profilePic: null });
+  const [profile, setProfile] = useState({ name: '', bio: '', profilePic: null, previewUrl: null });
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
@@ -230,17 +230,16 @@ export const OnBoard = () => {
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
-                    setProfile({ ...profile, profilePic: file });
                     const previewUrl = URL.createObjectURL(file);
-                    document.querySelector('.profile-preview').src = previewUrl;
+                    setProfile({ ...profile, profilePic: file, previewUrl });
                   }
                 }}
               />
-              {profile.profilePic && (
+              {profile.previewUrl && (
                 <img
-                  src={profile.profilePic}
+                  src={profile.previewUrl}
                   alt="Profile"
-                  className="w-24 h-24 mt-4 rounded-full object-cover"
+                  className="w-24 h-24 mt-4 rounded-full object-cover profile-preview"
                 />
               )}
             </div>
