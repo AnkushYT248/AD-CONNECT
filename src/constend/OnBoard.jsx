@@ -1,43 +1,65 @@
 import React, { useState, useEffect } from 'react';
 import { auth, onAuthStateChanged, db, doc, getDoc } from './firebase.js';
-import { sendSignInLinkToEmail } from 'firebase/auth';
 
 export const OnBoard = () => {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [generatedCode, setGeneratedCode] = useState('');
   const [isCodeVerified, setIsCodeVerified] = useState(false);
   const [profile, setProfile] = useState({ name: '', bio: '', profilePic: null });
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
 
-  // Generate a 6-digit random code
-  const generateCode = () => {
-    return Math.floor(100000 + Math.random() * 900000).toString();
+  const verifyCode = async () => {
+      try {
+          const response = await fetch('http://localhost:5000/api/auth/verify-otp', {
+              method: 'POST',
+              headers: {
+                  'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ email, code }),
+          });
+
+          const data = await response.json();
+
+          if (response.ok) {
+              setIsCodeVerified(true);
+              nextStep();
+          } else {
+              alert(data.error);
+          }
+      } catch (error) {
+          console.error('Error verifying OTP:', error);
+          alert('Failed to verify OTP. Please try again.');
+      }
   };
 
-  const sendVerificationCode = async () => {
-    const newCode = generateCode();
-    setGeneratedCode(newCode);
-    alert(`Your verification code is: ${newCode}`); // For development; use an email service in production
-  };
-
-  const verifyCode = () => {
-    if (code === generatedCode) {
-      setIsCodeVerified(true);
-      nextStep();
-    } else {
-      alert('Invalid code. Please try again.');
-    }
-  };
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (step === 1) {
-      sendVerificationCode();
-      nextStep();
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/send-otp', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ email }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          alert(`OTP sent to ${email}`);
+          nextStep();
+        } else {
+          alert(data.error);
+        }
+      } catch (error) {
+        console.error('Error sending OTP:', error);
+        alert('Failed to send OTP. Please try again.');
+      }
     } else if (step === 2) {
       verifyCode();
     } else if (step === 3) {
@@ -68,6 +90,8 @@ export const OnBoard = () => {
 
             if (isProfileComplete) {
               window.location.href = '/home';
+            }else {
+              
             }
           } catch (error) {
             console.error('Error fetching user data:', error);
@@ -82,8 +106,11 @@ export const OnBoard = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-base-200 p-4">
       <div className="w-full max-w-lg bg-base-100 p-8 rounded-lg shadow-lg">
-        <h1 className="text-2xl font-bold mb-6 text-center">AD Connect</h1>
-
+        <h1 className="text-2xl font-bold mb-6 text-center title-text">AD Connect</h1>
+        
+        <div class="alert rounded hidden">
+        </div>
+        
         <ul className="steps w-full mb-8">
           <li className={`step ${step >= 1 ? 'step-primary' : ''}`}>
             Email Confirmation
