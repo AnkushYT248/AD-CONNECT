@@ -17,5 +17,8 @@
 </html>
 <script>
   const theme = localStorage.getItem("theme") || "black";
+  if(!theme) {
+    loacalStorage.setItem("theme", "black");
+  }
   document.documentElement.setAttribute("data-theme", theme);
 </script>
