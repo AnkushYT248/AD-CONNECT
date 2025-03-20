@@ -16,3 +16,9 @@
   backdrop-filter: blur(2px);
   backface-visibility: hidden;
 }
+.group_container {
+  trasition: all 0.5s ease-in-out;
+}
+.group_container:hover {
+  background: #999;
+}

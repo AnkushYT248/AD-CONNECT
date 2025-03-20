@@ -15,11 +15,25 @@ import { FaSun } from "react-icons/fa";
 import { CgDarkMode } from "react-icons/cg";
 import { FaAffiliatetheme } from "react-icons/fa6";
 import { GrRadialSelected } from "react-icons/gr";
-import {Dialog} from "../components/Dialog.jsx"
+import { Dialog} from "../components/Dialog.jsx"
+import { getUserInfoRef,listenToAuthChanges } from '../util/FirebaseHelper.jsx';
 
 export const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'black');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [ profileImage, setProfileImage ] = useState('https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp');
+
+  listenToAuthChanges(async (user) => {
+    if(user) {
+      const userUid = user.uid;
+      getUserInfoRef(userUid, (userInfo) => {
+        if(userInfo) {
+          const { username,profile_picture } = userInfo;
+          setProfileImage(profile_picture);
+        }
+      });
+    }
+  });
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -105,8 +119,8 @@ export const Navbar = () => {
             >
               <div className="w-8 rounded-full">
                 <img
-                  alt="Profile"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  alt="avatar"
+                  src={profileImage}
                 />
               </div>
             </div>
@@ -120,7 +134,7 @@ export const Navbar = () => {
                     <RiProfileLine />
                     Profile
                   </div>
-                  <span className="badge">New</span>
+                  <span className="badge rounded">New</span>
                 </a>
               </li>
               <li>
