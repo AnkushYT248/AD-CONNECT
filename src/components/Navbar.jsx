@@ -24,19 +24,25 @@ export const Navbar = () => {
   const [ profileImage, setProfileImage ] = useState('https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp');
   const [isLoading, setIsLoading] = useState(true);
 
-  listenToAuthChanges(async (user) => {
-    if(user) {
-      setIsLoading(true);
-      const userUid = user.uid;
-      getUserInfoRef(userUid, (userInfo) => {
-        if(userInfo) {
-          const { username,profile_picture } = userInfo;
-          setProfileImage(profile_picture);
-        }
-        setIsLoading(false);
-      });
-    }
-  });
+  useEffect(() => {
+    const unsubscribe = listenToAuthChanges((user) => {
+      if(user) {
+        setIsLoading(true);
+        const userUid = user.uid;
+        getUserInfoRef(userUid, (userInfo) => {
+          if(userInfo) {
+            const { profile_picture } = userInfo;
+            if(profile_picture) {
+              setProfileImage(profile_picture);
+            }
+          }
+          setIsLoading(false);
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
