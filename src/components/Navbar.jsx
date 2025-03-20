@@ -22,15 +22,18 @@ export const Navbar = () => {
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'black');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [ profileImage, setProfileImage ] = useState('https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp');
+  const [isLoading, setIsLoading] = useState(true);
 
   listenToAuthChanges(async (user) => {
     if(user) {
+      setIsLoading(true);
       const userUid = user.uid;
       getUserInfoRef(userUid, (userInfo) => {
         if(userInfo) {
           const { username,profile_picture } = userInfo;
           setProfileImage(profile_picture);
         }
+        setIsLoading(false);
       });
     }
   });
@@ -49,7 +52,7 @@ export const Navbar = () => {
           <button className="btn btn-primary mt-4">Send Request</button>
         </div>
       </Dialog>
-      
+
       <div className="navbar bg-base-200 shadow-sm">
         <div className="flex-1">
           <a className="btn btn-ghost text-xl title-text">AD CONNECT</a>
@@ -117,12 +120,16 @@ export const Navbar = () => {
               role="button"
               className="btn btn-ghost btn-circle avatar"
             >
-              <div className="w-8 rounded-full">
-                <img
-                  alt="avatar"
-                  src={profileImage}
-                />
-              </div>
+              {isLoading ? (
+                <div className="skeleton h-8 w-8 rounded-full"></div>
+              ) : (
+                <div className="w-8 rounded-full">
+                  <img
+                    alt="avatar"
+                    src={profileImage}
+                  />
+                </div>
+              )}
             </div>
             <ul
               tabIndex={0}
