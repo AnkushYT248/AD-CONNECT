@@ -56,11 +56,6 @@ export const Wait = () => {
               batch.set(userFriendsRef, { friends: [] });
             }
 
-            const userFriendReqRef = doc(db, `registred-users/${user.uid}/friendRequest`, "request");
-            if (!(await getDoc(userFriendReqRef)).exists()) {
-              batch.set(userFriendReqRef, {});
-            }
-
             const userChatsRef = doc(db, `registred-users/${user.uid}/userChats`, "chats");
             if (!(await getDoc(userChatsRef)).exists()) {
               batch.set(userChatsRef, {});
