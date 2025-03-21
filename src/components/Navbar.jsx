@@ -106,9 +106,43 @@ export const Navbar = () => {
                             <img src="${userData.profile_picture || 'https://via.placeholder.com/150'}" alt="User" />
                           </div>
                         </div>
-                        <div>
+                        <div class="flex-1">
                           <h3 class="font-bold">${userData.username}</h3>
                           <p class="text-sm">${userData.bio || 'No bio'}</p>
+                          <button 
+                            class="btn btn-primary btn-sm mt-2"
+                            onclick="(async () => {
+                              try {
+                                const auth = getAuth();
+                                const currentUser = auth.currentUser;
+                                if (!currentUser) throw new Error('Not authenticated');
+
+                                const friendReqRef = doc(db, `registred-users/${uid}/friendRequest/request`);
+                                await updateDoc(friendReqRef, {
+                                  [currentUser.uid]: {
+                                    senderId: currentUser.uid,
+                                    senderName: '${userData.username}',
+                                    status: 'pending',
+                                    timestamp: new Date().toISOString(),
+                                  }
+                                });
+                                
+                                document.getElementById('searchResult').innerHTML += \`
+                                  <div class='alert alert-success mt-2'>
+                                    Friend request sent successfully!
+                                  </div>
+                                \`;
+                              } catch (error) {
+                                console.error('Error sending friend request:', error);
+                                document.getElementById('searchResult').innerHTML += \`
+                                  <div class='alert alert-error mt-2'>
+                                    Failed to send friend request
+                                  </div>
+                                \`;
+                              }
+                            })()">
+                            Send Friend Request
+                          </button>
                         </div>
                       </div>
                     `;
