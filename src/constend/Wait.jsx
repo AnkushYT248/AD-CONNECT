@@ -44,6 +44,7 @@ export const Wait = () => {
                 bio: "No bio yet",
                 followers: 0,
                 following: 0,
+                isPrivate: false,
                 isProfileComplete: false,
                 isEmailVerified: user.emailVerified || false, // Capture email verification status
               });
@@ -53,6 +54,11 @@ export const Wait = () => {
             const userFriendsRef = doc(db, `registred-users/${user.uid}/userFriends`, "friends");
             if (!(await getDoc(userFriendsRef)).exists()) {
               batch.set(userFriendsRef, { friends: [] });
+            }
+
+            const userFriendReqRef = doc(db, `registred-users/${user.uid}/friendRequest`, "request");
+            if (!(await getDoc(userFriendReqRef)).exists()) {
+              batch.set(userFriendReqRef, {});
             }
 
             const userChatsRef = doc(db, `registred-users/${user.uid}/userChats`, "chats");

@@ -9,7 +9,7 @@ export const Groups = () => {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <h1>Group 1</h1>
+            <h1>Friend 1</h1>
             <p>Last message</p>
           </div>
         </div>

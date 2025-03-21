@@ -9,7 +9,7 @@ export const Home = () => {
         if (!user) {
           window.location.href = "/";
         } else {
-          console.log(`user logged in`);
+          console.log(`user logged in ${user.email}`);
         }
       });
     } catch (error) {

@@ -1,5 +1,5 @@
 
-import { auth, signOut, onAuthStateChanged,db,doc,getDoc } from '../constend/firebase';
+import { auth, signOut, onAuthStateChanged,db,doc,getDoc,collection, getDocs } from '../constend/firebase';
 
 const handleSignOut = async () => {
   try {
@@ -21,11 +21,7 @@ const listenToAuthChanges = (callback) => {
 };
 
 const getUserInfoRef = async (userId, callBack) => {
-  const userInfoRef = doc(
-    db,
-    `registred-users/${userId}/user_info`,
-    'info',
-  );
+  const userInfoRef = doc(db, `registred-users/${userId}/user_info`, 'info');
 
   try {
     const userInfoSnap = await getDoc(userInfoRef);
@@ -33,13 +29,14 @@ const getUserInfoRef = async (userId, callBack) => {
     if (!userInfoSnap.exists()) {
       throw new Error('No user document found!');
     } else {
-      // Pass the retrieved data to the callback
       callBack(userInfoSnap.data());
     }
   } catch (error) {
     console.error('Error fetching user info:', error);
-    callBack(null, error); // Pass error to the callback if needed
+    callBack(null, error);
   }
 };
 
-export { handleSignOut, getCurrentUser, listenToAuthChanges, getUserInfoRef };
+
+
+export { handleSignOut, getCurrentUser, listenToAuthChanges, getUserInfoRef};
