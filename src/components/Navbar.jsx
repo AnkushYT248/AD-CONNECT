@@ -47,29 +47,7 @@ export const Navbar = () => {
   }, []);
 
   onAuthStateChanged(auth, async (user) => {
-    if (user) {
-      try {
-         const searchUser = async (uid) => {
-           try {
-             const userDoc = doc(db, "registred-users", uid);
-             const userSnapshot = await getDoc(userDoc);
-
-             if (userSnapshot.exists()) {
-               const userData = userSnapshot.data();
-               console.log("User found:", userData);
-               return userData;
-             } else {
-               console.log("No such user!");
-               return null;
-             }
-           } catch (error) {
-             console.error("Error fetching user:", error);
-           }
-         };
-      } catch (error) {
-         console.log(`${error}`);
-      }
-      
+    if (user) {  
       try {
         const userFriendReqRef = doc(
           db,
