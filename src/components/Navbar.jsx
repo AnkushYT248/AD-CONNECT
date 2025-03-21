@@ -102,8 +102,59 @@ export const Navbar = () => {
       <Dialog isOpen={isDialogOpen} onClose={() => setIsDialogOpen(false)}>
         <h3 className="font-bold text-lg">Add Friend</h3>
         <div className="py-4">
-          <input type="text" placeholder="Enter email,uid or username" className="input input-bordered w-full" />
-          <button className="btn btn-primary mt-4">Search User</button>
+          <div className="flex flex-col gap-4">
+            <input 
+              type="text" 
+              placeholder="Enter user UID" 
+              className="input input-bordered w-full" 
+              id="searchInput"
+            />
+            <button 
+              className="btn btn-primary" 
+              onClick={async () => {
+                const uid = document.getElementById('searchInput').value;
+                if (!uid) return;
+                
+                try {
+                  const userInfoRef = doc(db, `registred-users/${uid}/user_info/info`);
+                  const userInfoSnap = await getDoc(userInfoRef);
+                  
+                  if (userInfoSnap.exists()) {
+                    const userData = userInfoSnap.data();
+                    document.getElementById('searchResult').innerHTML = `
+                      <div class="flex items-center gap-4 bg-base-200 p-4 rounded-lg">
+                        <div class="avatar">
+                          <div class="w-16 rounded-full">
+                            <img src="${userData.profile_picture || 'https://via.placeholder.com/150'}" alt="User" />
+                          </div>
+                        </div>
+                        <div>
+                          <h3 class="font-bold">${userData.username}</h3>
+                          <p class="text-sm">${userData.bio || 'No bio'}</p>
+                        </div>
+                      </div>
+                    `;
+                  } else {
+                    document.getElementById('searchResult').innerHTML = `
+                      <div class="alert alert-error">
+                        User not found
+                      </div>
+                    `;
+                  }
+                } catch (error) {
+                  console.error('Error searching user:', error);
+                  document.getElementById('searchResult').innerHTML = `
+                    <div class="alert alert-error">
+                      Error searching user
+                    </div>
+                  `;
+                }
+              }}
+            >
+              Search User
+            </button>
+            <div id="searchResult" className="mt-4"></div>
+          </div>
         </div>
       </Dialog>
 
