@@ -45,11 +45,6 @@ export const Navbar = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [friendRequests, setFriendRequests] = useState([]);
   const [hasFriendRequests, setHasFriendRequests] = useState(false);
-  listenToAuthChanges((user)=> {
-    if(user) {
-      console.log(user.uid);
-    }
-  })
 
   useEffect(() => {
     let unsubscribe;
@@ -84,72 +79,101 @@ export const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    const fetchFriendRequests = async () => {
-      listenToAuthChanges(async (user) => {
-      if (user) {
-        const friendReqCollection = collection(
-          db,
-          `registred-users/${user.uid}/friendRequests`,
-        );
-        const snapshot = await getDocs(friendReqCollection);
+    let unsubscribe;
 
-        const requests = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setFriendRequests(requests);
-        setHasFriendRequests(requests.length > 0);
-      }
-        });
+    const fetchFriendRequests = () => {
+      listenToAuthChanges((user) => {
+        if (user) {
+          const friendReqCollection = collection(
+            db,
+            `registred-users/${user.uid}/friendRequests`
+          );
+
+          // Real-time listener
+          unsubscribe = onSnapshot(friendReqCollection, (snapshot) => {
+            const requests = snapshot.docs.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            setFriendRequests(requests);
+            setHasFriendRequests(requests.length > 0);
+          });
+        }
+      });
     };
 
     fetchFriendRequests();
+
+    return () => {
+      if (unsubscribe) unsubscribe();
+    };
   }, []);
 
   const handleAcceptRequest = async (requestId, senderId) => {
     try {
-      listenToAuthChanges(async (user) => {
-        if (user) {
-          const userFriendsRef = doc(db, `registred-users/${user.uid}/userFriends`, "friends");
+      const user = auth.currentUser;
+      if (user) {
+        const userFriendsRef = doc(db, `registred-users/${user.uid}/userFriends`, "friends");
+        const senderFriendsRef = doc(db, `registred-users/${senderId}/userFriends`, "friends");
 
-          // Generate timestamp first
-          const timestamp = new Date();
+        // Get sender info
+        const senderInfoRef = doc(db, `registred-users/${senderId}/user_info/info`);
+        const senderInfoSnap = await getDoc(senderInfoRef);
+        const senderInfo = senderInfoSnap.data();
 
+        // Get receiver info (current user)
+        const receiverInfoRef = doc(db, `registred-users/${user.uid}/user_info/info`);
+        const receiverInfoSnap = await getDoc(receiverInfoRef);
+        const receiverInfo = receiverInfoSnap.data();
+
+        if (senderInfo && receiverInfo) {
+          // Update receiver's friend list
           await updateDoc(userFriendsRef, {
             friends: arrayUnion({
               id: senderId,
+              name: senderInfo.username || "Unknown",
+              profileImage: senderInfo.profile_picture || "",
               status: 'accepted',
-              addedAt: timestamp, // Use generated timestamp instead of serverTimestamp()
+              addedAt: new Date(),
             }),
           });
 
-          console.log(`Friend request from ${senderId} accepted.`);
+          // Update sender's friend list
+          await updateDoc(senderFriendsRef, {
+            friends: arrayUnion({
+              id: user.uid,
+              name: receiverInfo.username || "Unknown",
+              profileImage: receiverInfo.profile_picture || "",
+              status: 'accepted',
+              addedAt: new Date(),
+            }),
+          });
 
+          // Delete the friend request
           await deleteDoc(doc(db, `registred-users/${user.uid}/friendRequests`, requestId));
-          setFriendRequests(friendRequests.filter((request) => request.id !== requestId));
-          setHasFriendRequests((prev) => prev.length > 0);
+
+          // Update state to reflect changes
+          setFriendRequests((prev) => prev.filter((request) => request.id !== requestId));
+          setHasFriendRequests(friendRequests.length - 1 > 0);
         }
-      });
+      }
+    } catch (error) {
+      console.log(`Error accepting friend request: ${error}`);
+    }
+  };
+
+  const handleDeclineRequest = async (requestId) => {
+    try {
+      const user = auth.currentUser;
+      if (user) {
+        await deleteDoc(doc(db, `registred-users/${user.uid}/friendRequests`, requestId));
+        setFriendRequests((prev) => prev.filter((request) => request.id !== requestId));
+        setHasFriendRequests(friendRequests.length - 1 > 0);
+      }
     } catch (error) {
       console.log(`error: ${error}`);
     }
   };
-
-const handleDeclineRequest =async (requestId) => {
-  try {
-     listenToAuthChanges(async (user)=> {
-       if(user) {
-         await deleteDoc(doc(db, `registred-users/${user.uid}/friendRequests/${requestId}`));
-
-         setFriendRequests(prev => prev.filter(request => request.id !== requestId));
-         setHasFriendRequests(prev => prev.length > 0);
-       }
-     })
-  } catch (error) {
-     console.log(`error: ${error}`);
-  }
-  
-}
   
   useEffect(() => {
     const unsubscribe = listenToAuthChanges((user) => {
@@ -268,7 +292,7 @@ const handleDeclineRequest =async (requestId) => {
                               });
 
                               document.getElementById("searchResult").innerHTML += `
-                                <div class='alert alert-success mt-2'>
+                                <div class='alert alert-success mt-2 rounded'>
                                   Friend request sent successfully!
                                 </div>
                               `;
@@ -279,7 +303,7 @@ const handleDeclineRequest =async (requestId) => {
                             console.error("Error sending friend request:", error);
                             document.getElementById("searchResult").innerHTML += `
                               <div class='alert alert-error mt-2'>
-                                Failed to send friend request
+                                Failed to send friend request !
                               </div>
                             `;
                           }
@@ -287,15 +311,15 @@ const handleDeclineRequest =async (requestId) => {
                     }
                   } else {
                     document.getElementById("searchResult").innerHTML = `
-                      <div class="alert alert-error">
-                        User not found
+                      <div class="alert alert-error text-white rounded">
+                        User not found !
                       </div>
                     `;
                   }
                 } catch (error) {
                   console.error("Error searching user:", error);
                   document.getElementById("searchResult").innerHTML = `
-                    <div class="alert alert-error">
+                    <div class="alert alert-error text-white rounded">
                       Error searching user
                     </div>
                   `;
